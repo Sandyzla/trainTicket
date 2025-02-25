@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticket.dao.FromToListDao">
+
+    <!--        <resultMap id="MapFromTo" type="FromToList">-->
+    <!--            <result property="staName" column="staFrom" jdbcType="VARCHAR"></result>-->
+    <!--            <result property="staName" column="staFrom" jdbcType="VARCHAR"></result>-->
+    <!--            <result property="staName" column="staTo" jdbcType="VARCHAR"></result>-->
+    <!--            <result property="tGo" column="tGo" jdbcType="TIME"></result>-->
+    <!--            <result property="tArrive" column="tArrive" jdbcType="TIME"></result>-->
+    <!--        </resultMap>-->
+
+    <select id="getByFromTo" resultType="FromToList">
+        select t3.train_id trainId, t1.sta_name staFrom, t1.no noFrom, t2.sta_name staTo, t2.no noTo, t1.t_go tGo, t2.t_arrive tArrive
+        from time_list t1, time_list t2, time_list t3
+        where t1.sta_name like CONCAT(#{from},'%')
+          and t2.sta_name like CONCAT(#{to},'%')
+          and t1.grow-t1.no = t2.grow-t2.no
+          and t3.no = 1
+          and t1.grow-t1.no = t3.grow-t3.no
+          and t1.no &lt; t2.no order by t1.t_go
+    </select>
+</mapper>

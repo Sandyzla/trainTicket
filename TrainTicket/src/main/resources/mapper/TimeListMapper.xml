@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticket.dao.TimeListDao">
+
+<!--    <resultMap id="StationPassList" type="TimeList">-->
+<!--        <id property="grow" column="grow" jdbcType="INTEGER"></id>-->
+<!--        <result property="trainId" column="train_id" jdbcType="VARCHAR"></result>-->
+<!--        <result property="staBegin" column="sta_begin" jdbcType="VARCHAR"></result>-->
+<!--        <result property="staEnd" column="sta_end" jdbcType="VARCHAR"></result>-->
+<!--        <result property="tBegin" column="t_begin" jdbcType="TIME"></result>-->
+<!--        <result property="tEnd" column="t_end" jdbcType="TIME"></result>-->
+<!--        <result property="type" column="type" jdbcType="VARCHAR"></result>-->
+<!--        <result property="no" column="no" jdbcType="INTEGER"></result>-->
+<!--        <result property="staName" column="sta_name" jdbcType="VARCHAR"></result>-->
+<!--        <result property="tArrive" column="t_arrive" jdbcType="TIME"></result>-->
+<!--        <result property="tGo" column="t_go" jdbcType="TIME"></result>-->
+<!--        <result property="tMid" column="t_mid" jdbcType="VARCHAR"></result>-->
+<!--        <result property="open" column="open" jdbcType="VARCHAR"></result>-->
+<!--    </resultMap>-->
+
+    <select id="getTimeListByDif" resultType="TimeList" parameterType="java.lang.Integer">
+        select * from time_list where (time_list.grow-time_list.no = #{dif})
+    </select>
+
+    <select id="getTimeListByTrainId" resultType="TimeList" parameterType="String">
+        select * from time_list where train_id = #{_parameter}
+    </select>
+
+<!--    public int FindCountByOneTrain(String trainId);-->
+    <select id="FindCountByOneTrain" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        select count(*) from time_list where (time_list.grow-time_list.no = #{dif})
+    </select>
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticket.dao.SeatDao">
+
+<!--    List<RemainTicket> getRemainTicket(String trainId, int staFrom, int staTo);-->
+<!--    &#45;&#45;      该查询样例负责TrainQueryPage组件界面查询显示余票信息-->
+<!--    &#45;&#45;  (参数:车次号,出发站,到达站,一等/二等)-->
+<!--    &#45;&#45; 	第一层:找到两站间一直空闲的座位(返回:车厢号,排,列)-->
+<!--    &#45;&#45;  第二层:找到每个车厢一直空闲的座位(返回:车厢号,余票数)-->
+<!--    &#45;&#45;  第三层:找到一等/二等座余票数(返回:票类型,余票数)-->
+<!--    &#45;&#45;  每层均可单独运行-->
+    <select id="getRemainTicket" resultType="RemainTicket" >
+        select seat_type ticket_type, sum(ticket) ticket_num
+        from (select car1, count(*) ticket
+              from (select carr car1, s_row, s_col
+                    from seat
+                    where train_id = #{trainId}
+                      and sta_no &gt;= #{noFrom}
+                      and sta_no &lt; #{noTo}
+                      and sale = 'N'
+                    group by train_id, carr, s_row, s_col
+                    having count(*) = #{noTo} - #{noFrom}) as free_seat
+              group by car1) car_seat
+                 inner join carriage on car_seat.car1 = carriage.carr and carriage.train_id = #{trainId}
+        group by seat_type
+    </select>
+
+<!--    List<Seat> getAvailableSeat(@Param("trainId") String trainId,-->
+<!--    @Param("noFrom") int noFrom, @Param("noTo") int noTo,-->
+<!--    @Param("ticketType") String ticketType);-->
+    <select id="getSeatsBySeatType" resultType="Seat">
+        select seat.train_id, sta_no, seat.carr, s_row, s_col, sale, version
+        from seat,
+             carriage
+        where seat.train_id = #{trainId}
+          and seat.train_id = carriage.train_id
+          and sta_no &gt;= #{noFrom}
+          and sta_no &lt; #{noTo}
+          and sale = 'N'
+          and carriage.seat_type = #{ticketType}
+          and carriage.carr = seat.carr
+        order by s_row, s_col, sta_no;
+    </select>
+
+<!--    List<String> getExistSeatType(@Param("trainId") String trainId);-->
+    <select id="getExistSeatTypeByCarriage" resultType="java.lang.String">
+        select distinct carriage.seat_type from carriage where train_id = #{trainId}
+    </select>
+
+<!--    void updateSeatByBuyTicket(@Param("trainId") String trainId, @Param("noFrom") int noFrom,-->
+<!--    @Param("noTo") int noTo, @Param("carr") int carr,-->
+<!--    @Param("sRow") int sRow, @Param("sCol") int sCol);-->
+    <update id="updateSeatBySetY">
+        update seat set sale = 'Y' , version = version + 1 where train_id = #{trainId} and carr = #{carr}
+        and s_row = #{sRow} and s_col = #{sCol} and sta_no = #{staNo} and sale = 'N' and version = #{version}
+    </update>
+
+<!--    updateSeatByRefundTicket-->
+    <update id="updateSeatBySetN">
+        update seat set sale = 'N' where train_id = #{trainId} and carr = #{carr}
+        and s_row = #{sRow} and s_col = #{sCol} and sta_no= #{staNo} and sale = 'Y'
+    </update>
+
+    <insert id="insertSeat">
+        insert into seat(train_id,sta_no,carr,s_row,s_col,sale,version) values(#{trainId},#{staNo},#{carr},#{sRow},#{sCol},#{sale},0)
+    </insert>
+<!--    int findNumOfSeatInOneCarriage(@Param("trainId")String trainId, @Param("carr") int carr);-->
+    <select id="findNumOfSeatInOneCarriage" resultType="java.lang.Integer">
+        select Count(*) from seat
+            where sta_no=1 and train_id = #{trainId} and carr = #{carr} group by train_id,carr
+    </select>
+
+    <delete id="deleteAllByOneTrainId">
+        delete from seat where train_id = #{trainId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticket.dao.TicketDao">
+
+    <insert id="insertTicket" parameterType="Ticket">
+        insert into ticket(order_id,id_num,train_id,sta_from,t_from,sta_to,t_to,carr,s_row,s_col,seat_type,price)values (#{ticket.orderId},#{ticket.idNum},#{ticket.trainId},#{ticket.staFrom}, #{ticket.tFrom}, #{ticket.staTo},#{ticket.tTo},#{ticket.carr},#{ticket.sRow},#{ticket.sCol},#{ticket.seatType},#{ticket.price});
+    </insert>
+
+<!--    public List<Ticket> selectUserTicket(@Param("idNum") String idNum);-->
+    <select id="selectTicketByIdNum" resultType="Ticket">
+        select ticket.order_id,
+               ticket.id_num,
+               train_id,
+               sta_from,
+               t_from,
+               sta_to,
+               t_to,
+               carr,
+               s_row,
+               s_col,
+               seat_type,
+               ticket.price
+        from ticket,
+             t_order
+        where ticket.order_id = t_order.order_id
+          and state = 'paid'
+          and ticket.id_num = #{idNum}
+    </select>
+    <select id="selectAnyTicketByIdNum" resultType="Ticket">
+        select *
+        from ticket
+        where id_num = #{idNum}
+    </select>
+    <delete id="deleteTicketByTrainId" >
+        delete from ticket where train_id = #{trainId}
+    </delete>
+
+    <select id="selectOrderIdByTrainId">
+        select ticket.order_id from ticket where train_id = #{trainId}
+    </select>
+
+    <select id="findTicketByOrderId" parameterType="java.lang.String" resultType="Ticket">
+        select * from ticket where order_id = #{order_id}
+    </select>
+
+    <delete id="deleteTicket" parameterType="Ticket">
+        delete from Ticket
+        where order_id = #{ticket.orderId}
+          and id_num = #{ticket.idNum}
+          and train_id = #{ticket.trainId}
+          and sta_from = #{ticket.staFrom}
+          and sta_to = #{ticket.staTo}
+          and t_from = #{ticket.tFrom}
+          and t_to = #{ticket.tTo}
+          and carr = #{ticket.carr}
+          and s_row = #{ticket.sRow}
+          and s_col = #{ticket.sCol}
+          and seat_type = #{ticket.seatType}
+          and price = #{ticket.price}
+    </delete>
+
+</mapper>
